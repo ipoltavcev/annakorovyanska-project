@@ -27,4 +27,8 @@ jobs:
           set -euo pipefail
           git clone --mirror "https://x-access-token:${GH_TOKEN_FOR_CLONE}@github.com/${GH_REPO}.git" repo.git
           cd repo.git
+          # GitHub's --mirror also pulls refs/pull/* (one ref per PR) which
+          # Codeberg refuses ("deny updating a hidden ref"). Strip them
+          # before pushing so the mirror push doesn't exit non-zero.
+          git for-each-ref --format='delete %(refname)' refs/pull/             | git update-ref --stdin || true
           git push --mirror "https://${CODEBERG_USER}:${CODEBERG_TOKEN}@codeberg.org/${CODEBERG_USER}/${REPO_NAME}.git"
